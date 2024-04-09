@@ -139,11 +139,11 @@ func (c *Client) RetrieveMessage(
 func (c *Client) ModifyMessage(
 	ctx context.Context,
 	threadID, messageID string,
-	metadata map[string]string,
+	metadata map[string]any,
 ) (msg Message, err error) {
 	urlSuffix := fmt.Sprintf("/threads/%s/%s/%s", threadID, messagesSuffix, messageID)
 	req, err := c.newRequest(ctx, http.MethodPost, c.fullURL(urlSuffix),
-		withBody(map[string]any{"metadata": metadata}), withBetaAssistantV1())
+		withBody(metadata), withBetaAssistantV1())
 	if err != nil {
 		return
 	}
