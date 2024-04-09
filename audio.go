@@ -3,6 +3,7 @@ package openai
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +15,13 @@ import (
 // Whisper Defines the models provided by OpenAI to use when processing audio with OpenAI.
 const (
 	Whisper1 = "whisper-1"
+)
+
+type TimestampGranularity string
+
+const (
+	TimestampGranularitySegment TimestampGranularity = "segment"
+	TimestampGranularityWord    TimestampGranularity = "word"
 )
 
 // Response formats; Whisper uses AudioResponseFormatJSON by default.
@@ -38,10 +46,16 @@ type AudioRequest struct {
 	// Reader is an optional io.Reader when you do not want to use an existing file.
 	Reader io.Reader
 
-	Prompt      string // For translation, it should be in English
-	Temperature float32
-	Language    string // For translation, just do not use it. It seems "en" works, not confirmed...
-	Format      AudioResponseFormat
+	Prompt                 string // For translation, it should be in English
+	Temperature            float32
+	Language               string // For translation, just do not use it. It seems "en" works, not confirmed...
+	Format                 AudioResponseFormat
+	TimeStampGranularities []TimestampGranularity
+}
+type Word struct {
+	Word  string  `json:"word"`
+	Start float64 `json:"start"`
+	End   float64 `json:"end"`
 }
 
 // AudioResponse represents a response structure for audio API.
@@ -62,7 +76,8 @@ type AudioResponse struct {
 		NoSpeechProb     float64 `json:"no_speech_prob"`
 		Transient        bool    `json:"transient"`
 	} `json:"segments"`
-	Text string `json:"text"`
+	Text  string `json:"text"`
+	Words []Word `json:"words"`
 
 	httpHeader
 }
@@ -178,7 +193,16 @@ func audioMultipartForm(request AudioRequest, b utils.FormBuilder) error {
 			return fmt.Errorf("writing language: %w", err)
 		}
 	}
+	if len(request.TimeStampGranularities) != 0 && request.Format != AudioResponseFormatVerboseJSON {
+		return errors.New("TimeStampGranularities only supported when response_format=verbose_json")
+	}
 
+	for _, g := range request.TimeStampGranularities {
+		err = b.WriteField("timestamp_granularities[]", string(g))
+		if err != nil {
+			return fmt.Errorf("writing timestamp_granularities[]: %w", err)
+		}
+	}
 	// Close the multipart writer
 	return b.Close()
 }
