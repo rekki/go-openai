@@ -92,7 +92,6 @@ func TestAudioTimeGranularities(t *testing.T) {
 	for _, failingField := range failOn {
 		failForField = failingField
 		mockFailedErr = fmt.Errorf("mock form builder fail on field %s", failingField)
-
 		err := audioMultipartForm(req, mockBuilder)
 		checks.ErrorIs(t, err, mockFailedErr, "audioMultipartForm should return error if form builder fails")
 	}
