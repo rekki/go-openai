@@ -29,6 +29,7 @@ const (
 	GPT4Turbo             = "gpt-4-turbo"
 	GPT4Turbo20240409     = "gpt-4-turbo-2024-04-09"
 	GPT4o                 = "gpt-4o"
+	GPT4o20240806         = "gpt-4o-2024-08-06"
 	GPT4o20240513         = "gpt-4o-2024-05-13"
 	GPT4oMini             = "gpt-4o-mini"
 	GPT4oMini20240718     = "gpt-4o-mini-2024-07-18"
@@ -93,6 +94,7 @@ var disabledModelsForEndpoints = map[string]map[string]bool{
 		GPT4Turbo:            true,
 		GPT4Turbo20240409:    true,
 		GPT4o:                true,
+		GPT4o20240806:        true,
 		GPT4o20240513:        true,
 		GPT4oMini:            true,
 		GPT4oMini20240718:    true,
